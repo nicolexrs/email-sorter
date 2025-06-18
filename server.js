@@ -18,18 +18,15 @@ app.post('/upload', upload.fields([
     const keywordsFilePath = req.files?.keywordsFile?.[0]?.path;
 
     if (!emailsFilePath || !keywordsFilePath) {
-        // Delete any uploaded file to avoid orphan files
         if (emailsFilePath && fs.existsSync(emailsFilePath)) fs.unlinkSync(emailsFilePath);
         if (keywordsFilePath && fs.existsSync(keywordsFilePath)) fs.unlinkSync(keywordsFilePath);
         return res.status(400).send('Please upload both an emails file and a keywords file.');
     }
 
     const keywordMap = new Map();
-    const emailResults = {};
     let outputContent = '';
 
     try {
-        // Read keywords
         const rlKeywords = readline.createInterface({
             input: fs.createReadStream(keywordsFilePath),
             crlfDelay: Infinity
@@ -39,43 +36,40 @@ app.post('/upload', upload.fields([
             const keyword = line.trim().toLowerCase();
             if (keyword) {
                 keywordMap.set(keyword, true);
-                emailResults[keyword] = [];
             }
         }
 
-        // Read emails and match keywords
         const rlEmails = readline.createInterface({
             input: fs.createReadStream(emailsFilePath),
             crlfDelay: Infinity
         });
 
+        const remainingEmails = [];
+
         for await (const line of rlEmails) {
             const email = line.trim().toLowerCase();
             if (email) {
+                let hasKeyword = false;
                 for (const keyword of keywordMap.keys()) {
                     if (email.includes(keyword)) {
-                        emailResults[keyword].push(email);
+                        hasKeyword = true;
+                        break;
                     }
+                }
+
+                if (!hasKeyword) {
+                    remainingEmails.push(email);
                 }
             }
         }
 
-        // Compile output
-        for (const keyword in emailResults) {
-            const matchedEmails = emailResults[keyword];
-            if (matchedEmails.length > 0) {
-                outputContent += `--- Keyword: ${keyword} ---\n`;
-                outputContent += matchedEmails.join('\n') + '\n\n';
-            }
-        }
-
-        res.send(outputContent || 'No matches found.');
+        outputContent = remainingEmails.join('\n');
+        res.send(outputContent || 'All emails contained keywords.');
 
     } catch (error) {
         console.error('Error processing files:', error);
         res.status(500).send('An error occurred during processing.');
     } finally {
-        // Clean up uploaded files
         if (fs.existsSync(emailsFilePath)) fs.unlinkSync(emailsFilePath);
         if (fs.existsSync(keywordsFilePath)) fs.unlinkSync(keywordsFilePath);
     }
