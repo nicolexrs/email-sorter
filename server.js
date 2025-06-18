@@ -7,19 +7,20 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
-// ✅ CHANGED: use memoryStorage instead of disk storage
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ dest: 'uploads/' });
 app.use(express.static('public'));
 
 app.post('/upload', upload.fields([
     { name: 'emailsFile' },
     { name: 'keywordsFile' }
 ]), async (req, res) => {
-    // ✅ CHANGED: Read from memory instead of disk path
-    const emailsFile = req.files?.emailsFile?.[0];
-    const keywordsFile = req.files?.keywordsFile?.[0];
+    const emailsFilePath = req.files?.emailsFile?.[0]?.path;
+    const keywordsFilePath = req.files?.keywordsFile?.[0]?.path;
 
-    if (!emailsFile || !keywordsFile) {
+    if (!emailsFilePath || !keywordsFilePath) {
+        // Delete any uploaded file to avoid orphan files
+        if (emailsFilePath && fs.existsSync(emailsFilePath)) fs.unlinkSync(emailsFilePath);
+        if (keywordsFilePath && fs.existsSync(keywordsFilePath)) fs.unlinkSync(keywordsFilePath);
         return res.status(400).send('Please upload both an emails file and a keywords file.');
     }
 
@@ -28,9 +29,9 @@ app.post('/upload', upload.fields([
     let outputContent = '';
 
     try {
-        // ✅ CHANGED: Read keyword file from memory
+        // Read keywords
         const rlKeywords = readline.createInterface({
-            input: require('stream').Readable.from(keywordsFile.buffer.toString().split(/\r?\n/)),
+            input: fs.createReadStream(keywordsFilePath),
             crlfDelay: Infinity
         });
 
@@ -42,9 +43,9 @@ app.post('/upload', upload.fields([
             }
         }
 
-        // ✅ CHANGED: Read email file from memory
+        // Read emails and match keywords
         const rlEmails = readline.createInterface({
-            input: require('stream').Readable.from(emailsFile.buffer.toString().split(/\r?\n/)),
+            input: fs.createReadStream(emailsFilePath),
             crlfDelay: Infinity
         });
 
@@ -74,7 +75,9 @@ app.post('/upload', upload.fields([
         console.error('Error processing files:', error);
         res.status(500).send('An error occurred during processing.');
     } finally {
-        // ✅ REMOVED: File cleanup no longer needed in memory mode
+        // Clean up uploaded files
+        if (fs.existsSync(emailsFilePath)) fs.unlinkSync(emailsFilePath);
+        if (fs.existsSync(keywordsFilePath)) fs.unlinkSync(keywordsFilePath);
     }
 });
 
