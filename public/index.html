@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Keyword Sorter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Email Keyword Sorter</h1>
+
+        <div class="upload-section">
+            <div class="input-group">
+                <label for="emailsFile">Upload Emails File (.txt or .csv):</label>
+                <input type="file" id="emailsFile" accept=".txt,.csv">
+            </div>
+            <div class="input-group">
+                <label for="keywordsFile">Upload Keywords File (.txt):</label>
+                <input type="file" id="keywordsFile" accept=".txt">
+            </div>
+            <button id="processButton">Process Files</button>
+        </div>
+
+        <div id="loading" class="hidden">
+            Processing... Please wait.
+        </div>
+
+        <div id="errorMessages" class="error-message hidden"></div>
+
+        <div class="results-section hidden">
+            <h2>Results:</h2>
+            <pre id="resultsOutput"></pre>
+            <button id="downloadButton">Download Results</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
