@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const emailsFile = emailsFileInput.files[0];
         const keywordsFile = keywordsFileInput.files[0];
 
-       
         errorMessagesDiv.textContent = '';
         errorMessagesDiv.classList.add('hidden');
         resultsSection.classList.add('hidden');
@@ -28,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Show loading
         loadingMessage.classList.remove('hidden');
 
         const formData = new FormData();
@@ -80,3 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     });
 });
+
+function showFileName(event, targetId) {
+    const input = event.target;
+    const fileName = input.files.length > 0 ? input.files[0].name : 'No file selected';
+    document.getElementById(targetId).textContent = fileName;
+}

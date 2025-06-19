@@ -1,40 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Keyword Sorter</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Email Keyword Sorter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            lightGray: '#e0e0e0',
+            darkGray: '#2a2a2a',
+          },
+          borderRadius: {
+            '4xl': '2rem',
+          },
+          boxShadow: {
+            neuLight: '10px 10px 30px #bebebe, -10px -10px 30px #ffffff',
+            neuDark: '10px 10px 30px #1a1a1a, -10px -10px 30px #2e2e2e',
+            innerDark: 'inset 10px 10px 20px #1a1a1a, inset -10px -10px 20px #2e2e2e',
+            innerLight: 'inset 10px 10px 20px #bebebe, inset -10px -10px 20px #ffffff',
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-    <div class="container">
-        <h1>Email Keyword Sorter</h1>
+<body class="min-h-screen flex items-center justify-center bg-lightGray dark:bg-darkGray text-gray-900 dark:text-gray-100 transition-colors">
 
-        <div class="upload-section">
-            <div class="input-group">
-                <label for="emailsFile">Upload Emails File (.txt or .csv):</label>
-                <input type="file" id="emailsFile" accept=".txt,.csv">
-            </div>
-            <div class="input-group">
-                <label for="keywordsFile">Upload Keywords File (.txt):</label>
-                <input type="file" id="keywordsFile" accept=".txt">
-            </div>
-            <button id="processButton">Process Files</button>
-        </div>
+  <button onclick="toggleDarkMode()"
+    class="fixed top-4 right-4 bg-lightGray dark:bg-darkGray text-sm px-4 py-2 rounded-full shadow-neuLight dark:shadow-neuDark hover:scale-105 transition-all">
+    Toggle Mode
+  </button>
 
-        <div id="loading" class="hidden">
-            Processing... Please wait.
-        </div>
+  <div class="p-8 w-full max-w-xl rounded-4xl shadow-neuLight dark:shadow-neuDark bg-lightGray dark:bg-darkGray space-y-10 transition-all">
+    <h1 class="text-3xl font-bold text-center">Email Sorter</h1>
 
-        <div id="errorMessages" class="error-message hidden"></div>
-
-        <div class="results-section hidden">
-            <h2>Results:</h2>
-            <pre id="resultsOutput"></pre>
-            <button id="downloadButton">Download Results</button>
-        </div>
+    <div class="space-y-4 group">
+      <label for="emailsFile"
+        class="cursor-pointer block text-center p-4 rounded-2xl shadow-innerLight dark:shadow-innerDark bg-lightGray dark:bg-darkGray transition-all group-hover:shadow-neuLight dark:group-hover:shadow-neuDark active:scale-95">
+        Upload Emails File (.txt or .csv)
+      </label>
+      <input type="file" id="emailsFile" class="hidden" accept=".txt,.csv" onchange="showFileName(event, 'file-name-1')" />
+      <p id="file-name-1" class="text-center text-sm opacity-70">No file selected</p>
     </div>
 
-    <script src="script.js"></script>
+    <div class="space-y-4 group">
+      <label for="keywordsFile"
+        class="cursor-pointer block text-center p-4 rounded-2xl shadow-innerLight dark:shadow-innerDark bg-lightGray dark:bg-darkGray transition-all group-hover:shadow-neuLight dark:group-hover:shadow-neuDark active:scale-95">
+        Upload Keywords File (.txt)
+      </label>
+      <input type="file" id="keywordsFile" class="hidden" accept=".txt" onchange="showFileName(event, 'file-name-2')" />
+      <p id="file-name-2" class="text-center text-sm opacity-70">No file selected</p>
+    </div>
+
+    <button id="processButton"
+      class="w-full py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-2xl font-bold shadow-md transition-all">
+      Process
+    </button>
+
+    <div id="loading" class="hidden text-center text-yellow-500 font-semibold">Processing... Please wait.</div>
+
+    <div id="errorMessages" class="hidden text-center text-red-500 text-sm"></div>
+
+    <div class="results-section hidden space-y-4">
+      <h2 class="text-2xl font-semibold">Results:</h2>
+      <pre id="resultsOutput" class="bg-black text-white p-4 rounded-xl overflow-auto max-h-60 shadow-innerLight dark:shadow-innerDark"></pre>
+      <button id="downloadButton"
+        class="w-full py-2 bg-green-500 hover:bg-green-600 active:scale-95 text-white rounded-xl shadow-md transition-all">
+        Download Results
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function showFileName(event, id) {
+      const file = event.target.files[0];
+      document.getElementById(id).textContent = file ? file.name : "No file selected";
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+  </script>
+
+  <script src="script.js"></script>
 </body>
 </html>
